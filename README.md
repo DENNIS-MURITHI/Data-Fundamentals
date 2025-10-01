@@ -158,24 +158,61 @@ JOIN songs s ON uf.song_id = s.song_id
 JOIN artists a ON s.artist_id = a.artist_id
 WHERE u.username = 'alice';
 ```
-![Output for Alice’s Favorites](your-screenshot-link-here-7)
+![Output for Alice’s Favorites](https://github.com/user-attachments/assets/9870a7c2-755d-4c78-af92-12c3b02ba315)
 
+## User Roles and Output
+
+**User add new songs to their favorited**
 ```sql
 -- Insert favorite (User only)
 INSERT INTO user_favorites (user_uuid, song_id)
-VALUES ('<alice-uuid>', 3);
+VALUES ('2d953804-5827-4f73-bfd5-41d83d53762f', 8);
 ```
-![Output after Insert Favorite](your-screenshot-link-here-8)
+```sql
+SELECT s.title AS song, a.name AS artist
+FROM user_favorites uf
+JOIN songs s ON uf.song_id = s.song_id
+JOIN artists a ON s.artist_id = a.artist_id
+WHERE uf.user_uuid = '2d953804-5827-4f73-bfd5-41d83d53762f';
+```
+  **Ouput upon updating their favorited**
 
+![Output after Insert Favorite](https://github.com/user-attachments/assets/56d8d4d4-639e-4f17-baf3-0d501b8d3b96)
+
+  **User can also delete their favorite songs**
+
+```sql
+DELETE FROM user_favorites
+WHERE user_uuid = '2d953804-5827-4f73-bfd5-41d83d53762f'  AND song_id = 8;
+```
+**Output upon deleting song with id=8**
+
+![Output after user deletes a specific songs](https://github.com/user-attachments/assets/794f8a04-ef31-4d8b-800b-8bf91cb6588f)
+
+
+
+## Admin Roles and Output
+
+**A view of the songs before updating**
+
+```sql
+SELECT song_id, title, artist_id
+FROM songs
+WHERE song_id = 1;
+```
+![Output of the song before the title is updated by Admin](https://github.com/user-attachments/assets/3cc4c88f-265f-4468-968c-0c2054b06f17)
+
+
+**Song Output after Admin update the title**
 ```sql
 -- Update a song (Admin only)
-UPDATE songs SET title = 'New Song Title' WHERE song_id = 1;
+UPDATE songs SET title = 'Programmers choice' WHERE song_id = 1;
 ```
-![Output after Update Song](your-screenshot-link-here-9)
+![Output after Update Song](https://github.com/user-attachments/assets/9f258a69-1202-41a1-b0c9-a7bf2722a3f8)
 
 ```sql
--- Delete an artist (Admin only)
-DELETE FROM artists WHERE artist_id = 1;
+-- Delete a song (Admin only)
+DELETE FROM artists WHERE song_id = 1;
 ```
 ![Output after Delete Artist](your-screenshot-link-here-10)
 
