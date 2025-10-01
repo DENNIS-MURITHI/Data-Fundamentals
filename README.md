@@ -15,6 +15,7 @@
 * [🚀 Live Demo](#live-demo)  
 * [💻 Getting Started](#getting-started)  
 * [💾 Sample SQL Queries & Policies](#sample-sql-queries)   
+* [🛡 Security Notes](#security-notes)  
 * [👥 Authors](#authors)  
 * [🔭 Future Features](#future-features)  
 * [🤝 Contributing](#contributing)  
@@ -27,14 +28,14 @@
 
 # 📖 About the Project <a name="about-project"></a>
 
-> This project models a **music streaming database** while demonstrating **admin and user roles** using **Row Level Security (RLS)** in Supabase.  
-> Students can explore CRUD operations, user access restrictions, and admin-only functions.
+This project models a **music streaming database** while demonstrating **admin and user roles** using **Row Level Security (RLS)** in Supabase.  
 
-**Key Goals:**
-
-- Implement least privilege access  
-- Apply policies for users and admins  
-- Test queries safely in Supabase  
+It showcases:  
+- ✅ UUID-based user authentication (linked with Supabase Auth)  
+- ✅ Admin vs User privileges with least privilege enforcement  
+- ✅ CRUD operations with RLS enforcement  
+- ✅ A tested SQL script to validate roles and policies
+- ✅ Output from Supabase based on roles and policies
 
 ---
 
@@ -48,16 +49,15 @@
 
 ## 🚀 Live Demo <a name="live-demo"></a>
 
-- [Supabase Dashboard Link](https://app.supabase.com)  
+- [Supabase Dashboard](https://app.supabase.com)  
 
 ---
 
 ## 💻 Getting Started <a name="getting-started"></a>
 
 ### Prerequisites
-
 - Supabase account  
-- PostgreSQL knowledge  
+- PostgreSQL basics  
 - Git installed  
 
 ### Setup
@@ -67,125 +67,132 @@ git clone https://github.com/DENNIS-MURITHI/music-streaming-database.git
 cd music-streaming-database
 ```
 
-### Usage
+```bash
+Usage
 
-1. Open Supabase Dashboard  
-2. Execute `schema.sql` to create tables & sample data  
-3. Enable **RLS** on tables:
+Open Supabase SQL editor
 
-```sql
+Run schema.sql to create tables & sample data
+
+Apply UUID + RLS setup:
+
 ALTER TABLE user_favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE songs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artists ENABLE ROW LEVEL SECURITY;
-```
 
-4. Add **policies** for admin & user roles.
+
+Apply user vs admin policies.
+```
 
 ---
 
 ## 💾 Sample SQL Queries & Policies <a name="sample-sql-queries"></a>
 
 ### 1️⃣ User Policies
-
 ```sql
 -- Users can view only their own favorites
 CREATE POLICY "Users can view their own favorites"
 ON user_favorites
 FOR SELECT
-USING (auth.uid() = user_id);
+USING (auth.uid() = user_uuid);
+```
 
--- Users can insert only their own favorites
+```sql
+-- Users can insert their own favorites
 CREATE POLICY "Users can insert their own favorites"
 ON user_favorites
 FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+WITH CHECK (auth.uid() = user_uuid);
+```
 
+```sql
 -- Users can read all songs & artists
 CREATE POLICY "Users can read all songs"
 ON songs
 FOR SELECT
 USING (true);
-
+```
+```sql
 CREATE POLICY "Users can read all artists"
 ON artists
 FOR SELECT
 USING (true);
 ```
 
-### 2️⃣ Admin Policies
+---
 
+### 2️⃣ Admin Policies
 ```sql
 -- Admins can manage all favorites
 CREATE POLICY "Admins can manage all favorites"
 ON user_favorites
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'));
+USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
+```
 
--- Admins can manage all songs & artists
+```sql
+-- Admins can manage all songs
 CREATE POLICY "Admins can manage all songs"
 ON songs
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'));
+USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
+```
 
+```sql
+-- Admins can manage all artists
 CREATE POLICY "Admins can manage all artists"
 ON artists
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'));
+USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
 ```
 
-### 3️⃣ Example CRUD Queries
+---
 
+### 3️⃣ Example CRUD Queries with their output.
 ```sql
 -- List all songs liked by Alice
 SELECT u.username, s.title, a.name AS artist_name
 FROM user_favorites uf
-JOIN users u ON uf.user_id = u.user_id
+JOIN users u ON uf.user_uuid = u.user_uuid
 JOIN songs s ON uf.song_id = s.song_id
 JOIN artists a ON s.artist_id = a.artist_id
 WHERE u.username = 'alice';
-
--- Find all songs by Sauti Sol
-SELECT s.title, s.release_year
-FROM songs s
-JOIN artists a ON s.artist_id = a.artist_id
-WHERE a.name = 'Sauti Sol';
-
--- Most popular artist (aggregate)
-SELECT a.name, COUNT(uf.user_id) AS total_favorites
-FROM artists a
-JOIN songs s ON a.artist_id = s.artist_id
-LEFT JOIN user_favorites uf ON s.song_id = uf.song_id
-GROUP BY a.artist_id
-ORDER BY total_favorites DESC;
-
--- Insert favorite (User only)
-INSERT INTO user_favorites (user_id, song_id)
-VALUES ('<alice-uid>', '<song-id>');
-
--- Update or delete songs (Admin only)
-UPDATE songs SET title = 'New Song Title' WHERE song_id = '<song-id>';
-DELETE FROM songs WHERE song_id = '<song-id>';
 ```
-
-### 4️⃣ Admin-only Function Example
+![Output for Alice’s Favorites](your-screenshot-link-here-7)
 
 ```sql
-CREATE OR REPLACE FUNCTION delete_song_safe(song_id INT)
-RETURNS VOID
-LANGUAGE SQL
-SECURITY DEFINER
-AS $$
-    DELETE FROM songs WHERE song_id = $1;
-$$;
+-- Insert favorite (User only)
+INSERT INTO user_favorites (user_uuid, song_id)
+VALUES ('<alice-uuid>', 3);
 ```
+![Output after Insert Favorite](your-screenshot-link-here-8)
+
+```sql
+-- Update a song (Admin only)
+UPDATE songs SET title = 'New Song Title' WHERE song_id = 1;
+```
+![Output after Update Song](your-screenshot-link-here-9)
+
+```sql
+-- Delete an artist (Admin only)
+DELETE FROM artists WHERE artist_id = 1;
+```
+![Output after Delete Artist](your-screenshot-link-here-10)
+
+---
+
+## 🛡 Security Notes <a name="security-notes"></a>
+
+See full explanation of RLS, policies, and admin functions in 👉 [security_notes.md]()
+
 
 ---
 
 ## 👥 Authors <a name="authors"></a>
 
-**Dennis Murithi**  
-- GitHub: [@dennismurithi](https://github.com/DENNIS-MURITHI)  
-- LinkedIn: [Dennis Murithi](https://www.linkedin.com/in/dennis-muthuri/)  
+- **Dennis Murithi**  
+  GitHub: [@dennismurithi](https://github.com/dennismurithi)  
+  LinkedIn: [Dennis Murithi](https://www.linkedin.com/in/dennis-murithi)  
 
 ---
 
@@ -212,19 +219,20 @@ Give a ⭐️ if you like this project!
 ## 🙏 Acknowledgements <a name="acknowledgements"></a>
 
 - Supabase docs for SQL & RLS policies  
-- PostgreSQL official docs   
+- PostgreSQL official docs  
+
 ---
 
 ## ❓ FAQ <a name="faq"></a>
 
-**Q:** How do I test RLS policies?  
-**A:** Sign in as User vs Admin and try CRUD operations. Policies will restrict or allow access accordingly.
+**Q: How do I test RLS policies?**  
+A: Sign in as User vs Admin and try CRUD operations. Policies will restrict or allow access accordingly.  
 
-**Q:** Can I extend this to a front-end?  
-**A:** Yes, connect Supabase Auth with React, Next.js, or any front-end framework.
+**Q: Can I extend this to a front-end?**  
+A: Yes, connect Supabase Auth with React, Next.js, or any front-end framework.  
 
 ---
 
 ## 📝 License <a name="license"></a>
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+This project is licensed under the MIT License - see the LICENSE file for details.
