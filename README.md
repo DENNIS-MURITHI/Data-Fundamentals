@@ -183,7 +183,7 @@ DELETE FROM artists WHERE artist_id = 1;
 
 ## 🛡 Security Notes <a name="security-notes"></a>
 
-See full explanation of RLS, policies, and admin functions in 👉 [security_notes.md]()
+See full explanation of RLS, policies, and admin functions in 👉 [security_notes.md](https://github.com/DENNIS-MURITHI/Data-Fundamentals/blob/data_test_branch/security_notes.md)
 
 
 ---
