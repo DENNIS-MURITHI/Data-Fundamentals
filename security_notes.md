@@ -113,6 +113,8 @@ USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admi
 3.  **DELETE artists** (works)
 
 ------------------------------------------------------------------------
+## ✅ From Supabase the Roles and Policies are well set
+![Plocies and Roles](
 
 ## 🛠 Admin-only Function
 
@@ -132,5 +134,5 @@ $$;
 
 ## 📎 Reference
 
--   Linked to [README.md](README.md)\
--   Supabase Docs: <https://supabase.com/docs>
+-   Linked to [README.md](README.md)
+-   Supabase Policies: <https://supabase.com/docs/guides/database/postgres/row-level-security>
