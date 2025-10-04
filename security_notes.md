@@ -114,6 +114,9 @@ USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admi
 
 ------------------------------------------------------------------------
 
+<img width="1355" height="682" alt="image" src="https://github.com/user-attachments/assets/da1574ed-80b1-4900-98c2-e803ab3d1d35"/>
+
+
 ## 🛠 Admin-only Function
 
 Example: Admin deletes a project or song safely.
@@ -130,7 +133,10 @@ $$;
 
 ------------------------------------------------------------------------
 
+<img width="1331" height="326" alt="image" src="https://github.com/user-attachments/assets/ca9f8afe-9e25-4293-95fd-0d5a34941ad2"/>
+
+
 ## 📎 Reference
 
--   Linked to [README.md](README.md)\
+-   Linked to [README.md](README.md)
 -   Supabase Docs: <https://supabase.com/docs>
